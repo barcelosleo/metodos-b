@@ -1,0 +1,7 @@
+20/08/19
+--------
+Método de Euler Explícito:
+	xn+1 = xn + dtv(tn,xn)
+
+
+Decaimento radioativo: dx/dt = -x/{tau} ({delta}t = 10^-3 milhões de anos)

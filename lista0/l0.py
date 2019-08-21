@@ -86,4 +86,4 @@ def ex_4():
     plt.ylabel(r"$\epsilon$")
     plt.show()
 
-ex_4()
+ex_3()
