@@ -8,7 +8,7 @@ tau = 700
 x0 = 1e6
 t0 = 0
 
-Xanterior = x0
+Xn = x0
 
 dts = []
 
@@ -17,12 +17,15 @@ N = 0
 Ts = []
 Xs = []
 
-while N <= 10e4:
-	Xn = Xanterior + dt * (-Xanterior/tau)
-	Ts.append(N * dt)
-	Xs.append(Xn)
+T = 0
 
-	Xanterior = Xn
+while T <= 2500:
+	Xn1 = Xn + dt * (-Xn/tau)
+	T = N * dt
+	Ts.append(T)
+	Xs.append(Xn1)
+
+	Xn = Xn1
 	N += 1
 
 Exp = [(math.exp(-i/tau) * x0) for i in Ts]
