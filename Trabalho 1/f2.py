@@ -4,6 +4,8 @@ import sys
 
 mi = 1.4e4 # Taxa de consumo de combustível [Kg/s]
 M = 2.7e6 # Massa total do foguete [Kg]
+# M = 3.7e6 # Massa total do foguete [Kg]
+# M = 100 # Massa total do foguete [Kg]
 Mc0 = M * 0.94 # Massa inicial de combustível [Kg] {94% da massa de combustível}
 M0 = M - Mc0 # Massa do foguete sem combustível [Kg]
 g = 9.8 # aceleração da gravidade [m/s²]
@@ -27,19 +29,25 @@ def velocidadeCombustivelExaurido(t):
 def f(t, m):
     return ((mi * Vc) / m) - g
 
-def momento(t, Vf, Vc_ = Vc):
-    return massaInstantaneaFoguete(t) * Vf - massaInstantaneaGasExpelido(t) * Vc_
+def momento(t, mf, mc, Vf):
+    return (mf * Vf) + (mc * (Vf - Vc))
+
+def energia(m, v, h):
+    return ((m * v ** 2) / 2) - (m * g * h)
 
 def euler(h, t_max, f):
     Vf = Vf0
 
     l_vf = [Vf]
     l_t = [0.]
-    l_m = [momento(0, Vf)]
+    l_m = [momento(0, M, 0, Vf)]
+    l_h = [0]
+    l_e = [0]
 
     i = 0
+    t = 0
     mf = M
-    while mf > M0:
+    while mf > M0 and t < t_max:
         i += 1
         t = float(i * h)
 
@@ -49,13 +57,17 @@ def euler(h, t_max, f):
 
         l_vf.append(Vf)
         l_t.append(t)
-        l_m.append(momento(t, Vf, 0))
+        l_m.append(momento(t, mf, mi * t, Vf))
+        l_h.append(l_h[-1] + (Vf * h))
+        l_e.append(energia(mf, Vf, l_h[-1]))
 
 
     return {
         'Vf': l_vf,
         't': l_t,
         'm': l_m,
+        'h': l_h,
+        'e': l_h,
     }
 
 def rk2(h, t_max, f):
@@ -63,11 +75,14 @@ def rk2(h, t_max, f):
 
     l_vf = [Vf]
     l_t = [0.]
-    l_m = [momento(0, Vf)]
+    l_m = [momento(0, M, 0, Vf)]
+    l_h = [0]
+    l_e = [0]
 
     i = 0
+    t = 0
     mf = M
-    while mf > M0:
+    while mf > M0 and t < t_max:
         i += 1
         t = float(i * h)
 
@@ -79,13 +94,17 @@ def rk2(h, t_max, f):
 
         l_vf.append(Vf)
         l_t.append(t)
-        l_m.append(momento(t, Vf, 0))
+        l_m.append(momento(t, mf, mi * t, Vf))
+        l_h.append(l_h[-1] + (Vf * h))
+        l_e.append(energia(mf, Vf, l_h[-1]))
 
 
     return {
         'Vf': l_vf,
         't': l_t,
         'm': l_m,
+        'h': l_h,
+        'e': l_h,
     }
 
 def rk4(h, t_max, f):
@@ -93,11 +112,14 @@ def rk4(h, t_max, f):
 
     l_vf = [Vf]
     l_t = [0.]
-    l_m = [momento(0, Vf)]
+    l_m = [momento(0, M, 0, Vf)]
+    l_h = [0]
+    l_e = [0]
 
     i = 0
+    t = 0
     mf = M
-    while mf > M0:
+    while mf > M0 and t < t_max:
         i += 1
         t = float(i * h)
 
@@ -111,30 +133,39 @@ def rk4(h, t_max, f):
 
         l_vf.append(Vf)
         l_t.append(t)
-        l_m.append(momento(t, Vf, 0))
+        l_m.append(momento(t, mf, mi * t, Vf))
+        l_h.append(l_h[-1] + (Vf * h))
+        l_e.append(energia(mf, Vf, l_h[-1]))
 
 
     return {
         'Vf': l_vf,
         't': l_t,
         'm': l_m,
+        'h': l_h,
+        'e': l_e,
     }
 
 def main():
     h = 0.1
-    t_max = 200
+    t_max = 1
     e = euler(h, t_max, f)
     r2 = rk2(h, t_max, f)
     r4 = rk4(h, t_max, f)
 
-    plt.plot(e['t'], e['Vf'])
-    plt.plot(r2['t'], r2['Vf'])
-    plt.plot(r4['t'], r4['Vf'])
-    plt.plot(e['t'], [velocidadeAnalitica(t) for t in e['t']])
+    # analitico = {
+    #     't': e['t'],
+    #     'Vf': [velocidadeAnalitica(t) for t in e['t']]
+    # }
 
-    plt.legend(['Euler', 'RK2', 'RK4', 'Analitico'])
+    # plt.plot(e['t'], e['Vf'])
+    # plt.plot(r2['t'], r2['Vf'])
+    # plt.plot(r4['t'], r4['Vf'])
+    # plt.plot(analitico['t'], analitico['Vf'])
 
-    plt.show()
+    # plt.legend(['Euler', 'RK2', 'RK4', 'Analitico'])
+
+    # plt.show()
 
     plt.plot(e['t'], e['m'])
     plt.plot(r2['t'], r2['m'])
