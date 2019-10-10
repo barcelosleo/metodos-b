@@ -1,22 +1,27 @@
 import matplotlib.pyplot as plt
 import math
+from scipy import constants
 
-a = 2
 G = 9.8
-C = 20
-M0 = 1000
-dMdt = -a * M0
+C = 3403
+r = 5
+ro = 1141
 
-def momento(m, v):
-	return m * v
+# Propelente: Oxigênio Líquido
+A = math.pi * r ** 2
+Pt = 101325 * 1 # Pa
+Tt = 275 # K
+gama = 1.4 #
 
-def f_a(m):
-  return - (C/m) * dMdt - G
+momento = lambda m, v: m * v
 
-def f_v(t, m):
-  return - (G * t) + (C * math.log(M0/m))
+def dMdT_(A, Pt, Tt, gama, M = 1):
+	R = constants.Avogadro
+	return ((A * Pt) / Tt ** (1 / 2)) * (gama / R) ** (1 / 2) * M * (1 + ((gama - 1) / 2) * M ** 2) ** (-(gama + 1) / 2 * (gama - 1))
 
-def velocity_verlet(x0, v0, t0, m0, combustivel, h, f_a, f_v):
+dMdt = dMdT_(A, Pt, Tt, gama)
+
+def velocity_verlet(x0, v0, t0, m0, p, p0, A, me, h):
 	x = x0
 	v = v0
 	t = t0
@@ -27,34 +32,36 @@ def velocity_verlet(x0, v0, t0, m0, combustivel, h, f_a, f_v):
 		'x': [x],
 		'v': [v],
 		'm': [m],
+		'a': [0],
 		'momento': [momento(m, v)],
 	}
 
 	i = 1
 
-	while combustivel > 0:
+	# a = lambda M: (((p - p0) * A) / M) - G + (C * dMdt) / M
+
+	def a(M):
+		return (((p - p0) * A) / M) - G + (C * dMdt) / M
+
+	while m >= me:
 		t = i * h # Calculo o tempo seguinte
-		m = m0 * (1 - a * t) # Calculo o quanto de massa será ejetado
-		combustivel -= m # Tira a massa ejetada do combustivel
+		m = m - i * dMdt
+		a1 = a(m)
 
-		a1 = f_a(m) # Calculo a primeira aceleração
+		x = x + v * h + (1 / 2) * a1 * h ** 2
 
+		m1 = m - (i + 1) * dMdt
+		a2 = a(m1)
 
-		v = v + (h ** 2) * ((a1 + a2) / 2)
-		x = x + v * h + (a / 2) * h ** 2
+		v = v + (a1 + a2) * (h / 2)
 
-
-		alpha = f(theta)
-		theta = theta + omega * h + (alpha / 2) * h ** 2
-		alpha2 = f(theta)
-		omega = omega + ((alpha + alpha2) / 2) * h
-
-		t = i * h
 
 		dados['t'].append(t)
-		dados['theta'].append(theta)
-		dados['omega'].append(omega)
-		dados['momento'].append(momento(theta, omega))
+		dados['x'].append(x)
+		dados['v'].append(v)
+		dados['m'].append(m)
+		dados['a'].append(a1)
+		dados['momento'].append(momento(m, v))
 
 		i += 1
 
@@ -136,8 +143,40 @@ def rk4(theta0, omega0, t0, tMax, h, f):
 
 	return dados
 
-def f(theta):
-	return (-G / L) * math.sin(theta)
-
 def main():
-  pass
+	x0 = 0
+	v0 = 0
+	t0 = 0
+	me = 100
+	mp = 900
+	m0 = me + mp
+	h = 0.01
+
+	p = 101325 * 9
+	p0 = 101325
+
+
+	verlet = velocity_verlet(x0, v0, t0, m0, p, p0, A, me, h)
+
+	# v_comp = {
+	# 	't': [],
+	# 	'x': [],
+	# 	'v': [],
+	# 	'm': [],
+	# 	'a': [],
+	# 	'momento': [],
+	# }
+
+	# for dado in verlet :
+
+
+	# plt.plot(verlet['t'], verlet['a'])
+	plt.plot(verlet['t'][1:], verlet['a'][1:])
+	# plt.plot(verlet['t'], verlet['m'])
+
+	# plt.legend(['Velocidade', 'Altura'])
+
+	plt.show()
+
+print(dMdt)
+main()

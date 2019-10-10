@@ -118,7 +118,7 @@ def f(theta):
 	return (-G / L) * math.sin(theta)
 
 def main():
-	theta0 = 1.5
+	theta0 = 3
 	omega0 = 0
 	t0 = 0
 	tMax = 20
