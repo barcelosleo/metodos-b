@@ -162,6 +162,7 @@ def main():
     plt.plot(analitico['t'], analitico['Vf'])
     plt.ylabel('V(m/s)')
     plt.xlabel('t(s)')
+    plt.legend(['Euler', 'RK2', 'RK4', 'Analítico'])
 
     plt.subplot(1, 2, 2)
     plt.plot(e['t'], e['h'])
@@ -228,20 +229,20 @@ def main():
         legends.append(f'RK2 h = {1 * 10 ** -j}')
         legends.append(f'RK4 h = {1 * 10 ** -j}')
 
-        for i in range(len(e['Vf'])):
-            erro_e.append(abs(e['Vf'][i] - analitico['Vf'][i]))
-            erro_r2.append(abs(r2['Vf'][i] - analitico['Vf'][i]))
-            erro_r4.append(abs(r4['Vf'][i] - analitico['Vf'][i]))
+        for i in range(1, len(e['Vf'])):
+            erro_e.append(abs(e['Vf'][i] - analitico['Vf'][i]) / analitico['Vf'][i])
+            erro_r2.append(abs(r2['Vf'][i] - analitico['Vf'][i]) / analitico['Vf'][i])
+            erro_r4.append(abs(r4['Vf'][i] - analitico['Vf'][i]) / analitico['Vf'][i])
 
-        plt.plot(e['t'], erro_e)
-        plt.plot(e['t'], erro_r2)
-        plt.plot(e['t'], erro_r4)
+        plt.plot(e['t'][1:], erro_e)
+        plt.plot(e['t'][1:], erro_r2)
+        plt.plot(e['t'][1:], erro_r4)
 
 
     plt.legend(legends)
     plt.yscale('log')
-    plt.ylabel(r'$ | V_n - V_{analitico} | $')
-    plt.xlabel('h')
+    plt.ylabel(r'$ \frac{| V_n - V_{analitico} |}{V_{analitico}} $')
+    plt.xlabel('Tempo(t)')
     plt.title('Erros')
 
     plt.show()
