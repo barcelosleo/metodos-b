@@ -150,9 +150,12 @@ def main():
     r2 = rk2(h, f)
     r4 = rk4(h, f)
 
+    tempos = e['t'][1:]
+    tempos.append(e['t'][-1] + h)
+
     analitico = {
-        't': e['t'],
-        'Vf': [velocidadeAnalitica(t) for t in e['t']]
+        't': tempos,
+        'Vf': [velocidadeAnalitica(t) for t in tempos]
     }
 
     plt.subplot(1, 2, 1)
