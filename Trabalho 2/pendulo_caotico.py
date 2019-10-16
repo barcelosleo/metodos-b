@@ -10,37 +10,70 @@ h = 0.01
 def f(t, F, V, X):
     return (F * math.cos(omega * t)) - (c * V) - math.sin(X)
 
-def rk4(X_0, V_0, h, F, t_max, f):
+def rk4(X_0, V_0, h, F, integration_t, t_max, f):
     X = X_0
     V = V_0
 
     i = 0
     t = 0
 
+    while t <= integration_t:
+        k1_X = V
+        k1_V = f(t, F, V, X)
+
+        k2_X = V + (h / 2) * k1_V
+        k2_V = f(t + (h / 2), F, V + k1_V * (h / 2), X + k1_X * (h / 2))
+
+        k3_X = V + (h / 2) * k2_V
+        k3_V = f(t + (h / 2), F, V + k2_V * (h / 2), X + k2_V * (h / 2))
+
+        k4_X = V +  h * k3_V
+        k4_V = f(t + h, F, V + k3_V * h, X + k3_X * h)
+
+        i += 1
+        t = i * h
+
+        X = X + (h / 6) * (k1_X + 2 * k2_X + 2 * k3_X + k4_X)
+        V = V + (h / 6) * (k1_V + 2 * k2_V + 2 * k3_V + k4_V)
+
+        if X > math.pi:
+            X -= 2 * math.pi
+        elif X <= -math.pi:
+            X += 2 * math.pi
+
+    print((X, V))
+
     dados = {
-        't': [0],
+        't': [t],
         'x': [X],
         'v': [V],
     }
 
-    while t <= t_max:
-        i += 1
-        t = i * h
+    i = 0
 
+    while t <= (integration_t + t_max):
         k1_X = V
         k1_V = f(t, F, V, X)
 
-        k2_X = V + (h / 2) * V
+        k2_X = V + (h / 2) * k1_V
         k2_V = f(t + (h / 2), F, V + k1_V * (h / 2), X + k1_X * (h / 2))
 
-        k3_X = V + (h / 2) * V
+        k3_X = V + (h / 2) * k2_V
         k3_V = f(t + (h / 2), F, V + k2_V * (h / 2), X + k2_V * (h / 2))
 
-        k4_X = V +  h * V
+        k4_X = V +  h * k3_V
         k4_V = f(t + h, F, V + k3_V * h, X + k3_X * h)
 
         X = X + (h / 6) * (k1_X + 2 * k2_X + 2 * k3_X + k4_X)
         V = V + (h / 6) * (k1_V + 2 * k2_V + 2 * k3_V + k4_V)
+
+        i += 1
+        t = integration_t +  i * h
+
+        if X > math.pi:
+            X -= 2 * math.pi
+        elif X <= -math.pi:
+            X += 2 * math.pi
 
         dados['t'].append(t)
         dados['x'].append(X)
@@ -49,23 +82,27 @@ def rk4(X_0, V_0, h, F, t_max, f):
     return dados
 
 def main():
-    F = 0.8
-
     X_0 = 1
     V_0 = 0
-    t_max = 20 * math.pi
+    t_max = 200 * math.pi
+    integration_t = 800
 
-    dados = rk4(X_0, V_0, h, F, t_max, f)
+    for i in range(4, 11):
+        F = i / 10
 
-    plt.subplot(1, 2, 1)
-    plt.plot(dados['t'], dados['x'])
-    plt.grid(True)
+        dados = rk4(X_0, V_0, h, F, integration_t, t_max, f)
 
-    plt.subplot(1, 2, 2)
-    plt.plot(dados['x'], dados['v'])
-    plt.grid(True)
-    # plt.xticks(np.arange(-math.pi, math.pi, 0.5))
+        plt.subplot(1, 2, 1)
+        plt.plot(dados['t'], dados['v'])
+        plt.grid(True)
+        plt.title(f"F = {F}")
 
-    plt.show()
+        plt.subplot(1, 2, 2)
+        plt.plot(dados['x'], dados['v'], '.')
+        plt.xlim(-math.pi, math.pi)
+        plt.grid(True)
+        plt.title(f"F = {F}")
+
+        plt.show()
 
 main()
