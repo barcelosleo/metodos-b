@@ -43,14 +43,14 @@ def primeira_parte():
 	plt.subplot(3, 2, 3)
 	plt.plot(lista, desvios)
 	plt.subplot(3, 2, 5)
-	plt.hist(x, bins=100)
+	plt.hist(x, bins=100, density=True)
 
 	plt.subplot(3, 2, 2)
 	plt.plot(range(1, len(y) + 1), y)
 	plt.subplot(3, 2, 4)
 	plt.plot(range(1, len(y) + 1), desvios_y)
 	plt.subplot(3, 2, 6)
-	plt.hist(y, bins=100)
+	plt.hist(y, bins=100, density=True)
 	plt.show()
 
 def segunda_parte():
